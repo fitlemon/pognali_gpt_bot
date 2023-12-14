@@ -172,8 +172,8 @@ async def update_user_data(new_data: dict, user_id: int) -> bool:
     json_data = json.load(open("db.json", encoding='utf8'))
     
     for i, data in enumerate(json_data):
-        if type(data) is dict:
-            if user_id == data.get('user_id'):
+        if type(data) is dict and type(new_data) is dict:
+            if user_id == data.get('user_id') and data.keys() == new_data.keys():
                 json_data[i] = new_data
                 with open("db.json", "w", encoding='utf8') as outfile:
                     json.dump(json_data, outfile, ensure_ascii=False)
