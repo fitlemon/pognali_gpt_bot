@@ -48,8 +48,10 @@ logging.basicConfig(filename='logging.txt',
 
 async def prompt_to_dude(prompt, userdata) -> dict:
     try:
+        last_question = userdata['last_question']
+        del userdata['last_question']
         intro_rule = "Ты знаменитый  журналист!! Я твой собедник!! Ты берешь у меня интервью уже пол часа. Ты задаешь мне вопросы, я на них отвечаю."
-        question = f"Вот твой последний вопрос:  {userdata['last_question']} \n"        
+        question = f"Вот твой последний вопрос:  {last_question} \n"        
         user_message = f"\n Вот мой ответ на этот вопрос:  {prompt}. \n"
         user_dict =f"Также я тебе дам  Python словарь, где приведена информация которой ты обладаешь обо мне на текущий момент.:  \n \
                    ```{userdata}```\n"
@@ -60,6 +62,9 @@ async def prompt_to_dude(prompt, userdata) -> dict:
             model="gpt-3.5-turbo",
             messages=full_message         
         )
+        userdata['last_question'] = last_question
+        
+        print(f"\n\nASK QUESTION: \n\n {full_message}")
         if response['usage']['total_tokens'] >= max_token_count:
             return None
         
@@ -69,13 +74,17 @@ async def prompt_to_dude(prompt, userdata) -> dict:
 
 async def prompt_to_dict_changer(prompt, userdata) -> dict:
     try:
+        last_question = userdata['last_question']
+        del userdata['last_question']
+        print(f"\n\nINTRO DICT\n\n:{userdata}")
         intro_rule = "Receive a snippet of an interview: journalist's question and interviewee's answer. Also, get the interviewee's profile dictionary. Fill in the user's profile as a dictionary using the question and answer. Update only existing keys, do not create new ones. Send me only the updated dictionary!"
-        question = f"Journalist's question:  {userdata['last_question']} \n"        
+        question = f"Journalist's question:  {last_question} \n"        
         user_message = f"\n \n Interviewee's answer to this question:   {prompt}. \n"
         user_dict =f"User data dictionary: \n \
                    ```{userdata}```\n"
         final_rule = "Your actions: 1) Extract keywords (my interests, my favorite things and info about Interviewee) from the answer. 2) Update dictionary items with the found information (Only update existing keys like a age, sex, my_city, favirite_sports, favorite_countries, favorite_cities, user_interests, topics_history, about_me)  4) Don't create new keys in dictionary. 3) Send me the updated dictionary in the format \{new_dict\}. Nothing extra!"
-        full_message = [{"role": "user", "content": intro_rule + question + user_message + user_dict + final_rule}]                  
+        full_message = [{"role": "user", "content": intro_rule + question + user_message + user_dict + final_rule}]
+        print(f"\n\nASK DICT\n\n:{full_message}")
         response = await openai.ChatCompletion.acreate(
             model="gpt-3.5-turbo",
             messages=full_message         
@@ -83,7 +92,10 @@ async def prompt_to_dict_changer(prompt, userdata) -> dict:
         if response['usage']['total_tokens'] >= max_token_count:
             return None
         
-        return response['choices'][0]['message']['content'] , full_message, response['usage']['total_tokens']
+        print(f"\n\nRESPONSE:\n\n {response['choices'][0]['message']['content']}")
+        json_data = json.loads(response['choices'][0]['message']['content'].replace("'",'"'))
+        json_data['last_question'] = last_question
+        return json_data
     except Exception as e:
         logging.error(e)
  
@@ -142,10 +154,15 @@ async def get_user_data(user_id: int) -> dict:
     '''
     Find user in json DB and return data about user if exists
     '''
+    print(f"Getting user data for user: {user_id}...")
     json_data = json.load(open("db.json"))
     for data in json_data:
-        if user_id == data['user_id']:
-            return data
+        if type(data) is  dict:
+            if user_id == data.get('user_id'):
+                print(f"Got data for user {user_id}...")
+                return data
+        else:
+            print(f"Not valid data type...{type(data)}")
     return None
 
 async def update_user_data(new_data: dict, user_id: int) -> bool:
@@ -155,12 +172,13 @@ async def update_user_data(new_data: dict, user_id: int) -> bool:
     json_data = json.load(open("db.json", encoding='utf8'))
     
     for i, data in enumerate(json_data):
-        if user_id == data['user_id']:
-            json_data[i] = new_data
-            with open("db.json", "w", encoding='utf8') as outfile:
-                json.dump(json_data, outfile, ensure_ascii=False)
-            print(f'Dict fo user {user_id} Updated!')
-            return True 
+        if type(data) is dict:
+            if user_id == data.get('user_id'):
+                json_data[i] = new_data
+                with open("db.json", "w", encoding='utf8') as outfile:
+                    json.dump(json_data, outfile, ensure_ascii=False)
+                print(f'Dict fo user {user_id} Updated!')
+                return True 
         
     json_data.append(new_data)
     with open("db.json", "w", encoding='utf8') as outfile:
@@ -174,8 +192,9 @@ async def add_new_user_data(user_data: dict, user_id: int) -> bool:
     json_data = json.load(open("db.json", encoding='utf8'))
     
     for i, data in enumerate(json_data):
-        if user_id == data['user_id']:
-            return None
+        if type(data) is  dict:
+            if user_id == data.get('user_id'):
+                return None
         
     json_data.append(user_data)
     with open("db.json", "w", encoding='utf8') as outfile:
@@ -189,9 +208,10 @@ async def add_last_question(question: dict, user_id: int) -> bool:
     json_data = json.load(open("db.json", encoding='utf8'))
     
     for i, data in enumerate(json_data):
-        if user_id == data['user_id']:
-            json_data[i]['last_question'] = question
-            with open("db.json", "w", encoding='utf8') as outfile:
-                json.dump(json_data, outfile, ensure_ascii=False)
-            print(f'Last question for user {user_id} Updated!')
-            return True 
+        if type(data) is  dict:
+            if user_id == data.get('user_id'):
+                json_data[i]['last_question'] = question
+                with open("db.json", "w", encoding='utf8') as outfile:
+                    json.dump(json_data, outfile, ensure_ascii=False)
+                print(f'Last question for user {user_id} Updated!')
+                return True 

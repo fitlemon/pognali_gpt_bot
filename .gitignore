@@ -1,4 +1,5 @@
 .venv/
-config.py
 .env
 db.json
+logging.txt
+__pycache__/
