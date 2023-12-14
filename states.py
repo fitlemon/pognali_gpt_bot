@@ -10,4 +10,5 @@ class Gen(StatesGroup):
     change_my_city = State()
     change_interests = State()
     initial_state = State()
+    update_info = State()
   

@@ -1,31 +1,22 @@
 import json
+import re
 
+st = """{"content": "\u041f\u0440\u0438\u0432\u0435\u0442, Davron! \u0420\u0430\u0434 \u043f\u043e\u0437\u043d\u0430\u043a\u043e\u043c\u0438\u0442\u044c\u0441\u044f \u0441 \u0442\u043e\u0431\u043e\u0439. \u042f \u0437\u0430\u043c\u0435\u0447\u0430\u0442\u0435\u043b\u044c\u043d\u043e \u0441\u043f\u0440\u0430\u0432\u043b\u044f\u044e\u0441\u044c \u0441 \u043f\u043e\u0438\u0441\u043a\u043e\u043c \u0438\u043d\u0442\u0435\u0440\u0435\u0441\u043d\u044b\u0445 \u043c\u0435\u0441\u0442 \u0438 \u043c\u0435\u0440\u043e\u043f\u0440\u0438\u044f\u0442\u0438\u0439. \u0420\u0430\u0441\u0441\u043a\u0430\u0436\u0438, \u0447\u0442\u043e \u0442\u0435\u0431\u044f \u0431\u043e\u043b\u044c\u0448\u0435 \u0432\u0441\u0435\u0433\u043e \u0438\u043d\u0442\u0435\u0440\u0435\u0441\u0443\u0435\u0442: \u0442\u0435\u0430\u0442\u0440\u044b, \u043a\u0438\u043d\u043e\u0442\u0435\u0430\u0442\u0440\u044b, \u0434\u043e\u0441\u0442\u043e\u043f\u0440\u0438\u043c\u0435\u0447\u0430\u0442\u0435\u043b\u044c\u043d\u043e\u0441\u0442\u0438 \u0438\u043b\u0438 \u0447\u0442\u043e-\u0442\u043e \u0435\u0449\u0435? \u0418 \u0435\u0441\u043b\u0438 \u0435\u0441\u0442\u044c \u043a\u0430\u043a\u0438\u0435-\u0442\u043e \u043a\u043e\u043d\u043a\u0440\u0435\u0442\u043d\u044b\u0435 \u043f\u0440\u0435\u0434\u043f\u043e\u0447\u0442\u0435\u043d\u0438\u044f, \u043d\u0430\u043f\u0440\u0438\u043c\u0435\u0440, \u0436\u0430\u043d\u0440\u044b \u0444\u0438\u043b\u044c\u043c\u043e\u0432 \u0438\u043b\u0438 \u0432\u0438\u0434\u044b \u0441\u043f\u043e\u0440\u0442\u0430, \u0442\u043e \u043f\u043e\u0434\u0435\u043b\u0438\u0441\u044c \u0438\u043c\u0438 \u0441\u043e \u043c\u043d\u043e\u0439. \u0427\u0442\u043e\u0431\u044b \u043c\u043d\u0435 \u0431\u044b\u043b\u043e \u043b\u0435\u0433\u0447\u0435 \u043d\u0430\u0439\u0442\u0438 \u0442\u043e, \u0447\u0442\u043e \u0442\u0435\u0431\u0435 \u043f\u043e\u043d\u0440\u0430\u0432\u0438\u0442\u0441\u044f! \ud83d\ude0a",
+  "role": "assistant"
+}"""
+st = st.encode("utf-16", "surrogatepass").decode("utf-16")
+d_data = json.loads(st.replace("'", '"'))
 
-data = []
-data_dict = {}
-data.append(data_dict)
-data_dict['people'] = []
-data_dict['people'].append({
-    'name': 'Scott',
-    'website': 'pythonist.ru',
-    'from': 'Nebraska'
-})
-data_dict['people'].append({
-    'name': 'Larry',
-    'website': 'pythonist.ru',
-    'from': 'Michigan'
-})
-data_dict['people'].append({
-    'name': 'Tim',
-    'website': 'pythonist.ru',
-    'from': 'Alabama'
-})
+# st2 = "\ud83d\ude04".encode('utf-16','surrogatepass').decode('utf-16')
+# print(st2)
+import re
 
+text = "Конечно, вот обновленный словарь с заполненными ключевыми словами: \n \
+\n\
+my_info_dict вфавфафа= вфв{'user_id': 400690372, 'user_name': 'ihmatullaev', 'user_firstname': 'Davron', 'user_surname': '', 'age': 0, 'sex': '', 'about_me': ['new user'], 'topics_history': ['Твои любимые фильмы'], 'favorite_films': ['Титаник'], 'favorite_books': [''], 'favorite_shows': [''], 'favorite_sports': [''], 'favorite_countries': [''], 'favorite_cities': [''], 'favorite_youtube_channels': [''], 'user_city': 'unknown', 'user_interests': [''], 'last_question': 'Привет, Даврон! Спасибо за комментарий по поводу предыдущего ответа. Я действительно хотел бы узнать о тебе больше, поэтому давай продолжим наше интервью. \n\nИтак, перейдем к следующей теме. Я вижу, что у тебя есть интересы в фильмах. Какие жанры или фильмы ты предпочитаешь смотреть? Может быть, у тебя есть любимые актеры или актрисы? Я бы хотел узнать больше о твоих предпочтениях в кино. Расскажи мне о том, что ты наслаждаешься в фильмах, чтобы я мог обновить информацию в словаре.'}" 
+pattern = re.compile(r"({[^}]*})", re.DOTALL)
+match = pattern.search(text)
 
-try:
-    json_data = json.load(open("db.json"))
-    json_data.append(data)
-except:
-    json_data = data
-with open('db.json', 'w') as outfile:
-    json.dump(json_data, outfile)
+if match:
+    dictionary_text = match.group(1)
+    print(dictionary_text)

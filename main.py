@@ -1,14 +1,15 @@
 import asyncio
 import logging
+from environs import Env
 
 from aiogram import Bot, Dispatcher
 from aiogram.enums.parse_mode import ParseMode
 from aiogram.fsm.storage.memory import MemoryStorage
 
-#import config
-from handlers import router
-from environs import Env
 
+from handlers import router
+
+#import env config file
 env = Env()
 env.read_env()
 
