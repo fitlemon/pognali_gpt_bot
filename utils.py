@@ -154,12 +154,12 @@ async def get_user_data(user_id: int) -> dict:
     '''
     Find user in json DB and return data about user if exists
     '''
-    print(f"Getting user data for user: {user_id}...")
+    print(f"\nGetting data for user: {user_id}...\n")
     json_data = json.load(open("db.json"))
     for data in json_data:
         if type(data) is  dict:
             if user_id == data.get('user_id'):
-                print(f"Got data for user {user_id}...")
+                print(f"\nGot data for user {user_id}...\n")
                 return data
         else:
             print(f"Not valid data type...{type(data)}")
@@ -170,14 +170,14 @@ async def update_user_data(new_data: dict, user_id: int) -> bool:
     Find user in json DB
     '''
     json_data = json.load(open("db.json", encoding='utf8'))
-    
+    print(f"\nUpdating data for user: {user_id}...\n")
     for i, data in enumerate(json_data):
         if type(data) is dict and type(new_data) is dict:
-            if user_id == data.get('user_id') and data.keys() == new_data.keys():
-                json_data[i] = new_data
+            if user_id == data.get('user_id'):
+                json_data[i].update(new_data)
                 with open("db.json", "w", encoding='utf8') as outfile:
                     json.dump(json_data, outfile, ensure_ascii=False)
-                print(f'Dict fo user {user_id} Updated!')
+                print(f'\nDict fo user {user_id} Updated!\n')
                 return True 
         
     json_data.append(new_data)
