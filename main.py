@@ -17,7 +17,7 @@ env.read_env()
    
 
 async def main():
-    bot = Bot(token=env("LOCAL_BOT"), parse_mode=ParseMode.HTML)
+    bot = Bot(token=env("BOT_TOKEN"), parse_mode=ParseMode.HTML)
     dp = Dispatcher(storage=MemoryStorage())
     dp.include_router(router)
     await bot.delete_webhook(drop_pending_updates=True)
