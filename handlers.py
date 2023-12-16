@@ -75,6 +75,7 @@ async def start_handler(msg: Message, state: FSMContext):
 @router.message(F.text == "Меню")
 @router.message(F.text == "Выйти в меню")
 @router.message(F.text == "◀️ Выйти в меню")
+@router.message(Command("menu"))
 async def menu(msg: Message, state: FSMContext):
     await msg.answer("Выходим в главное меню...", reply_markup=ReplyKeyboardRemove()) # Remove Keyboard
     await state.set_state(Gen.initial_state) # change State to Initial State
@@ -82,6 +83,7 @@ async def menu(msg: Message, state: FSMContext):
 
 
 # Handler for catch "Where to go?!" button pushing
+
 @router.callback_query(F.data == "my_city_events")
 async def input_text_prompt(clbck: CallbackQuery, state: FSMContext):
     await state.set_state(Gen.event_list_prompt) 
@@ -93,7 +95,7 @@ async def input_text_prompt(clbck: CallbackQuery, state: FSMContext):
         return await clbck.message.answer(text.gen_error, reply_markup=kb.exit_kb)
     
     await clbck.message.answer(
-        res[0] + text.text_watermark, disable_web_page_preview=True, reply_markup=kb.exit_kb
+        res[0] + text.text_watermark, disable_web_page_preview=True, reply_markup=kb.update_info
     )
     await state.set_state(Gen.text_prompt)
 
@@ -117,7 +119,7 @@ async def request_for_change_my_info(clbck: CallbackQuery, state: FSMContext):
         
     except:
         await clbck.message.answer(text.gen_error, reply_markup=kb.exit_kb)
-       
+  
  ## Handler for messages in "Update info" State  
 @router.message(Gen.update_info)
 async def change_my_info(msg: Message, state: FSMContext):

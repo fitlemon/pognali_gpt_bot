@@ -1,6 +1,14 @@
+
+# <img src='./static/img/mipt-icon.png' width="70" height="30"> 
 # Проект ассистента по поиску мероприятий в любом городе (Проектный практикум МФТИ 2023)
 
-#### Автор проекта: Davron Ikhmatullaev
+#### Участники проекта: 
+
+1. Davron Ikhmatullaev <img src='./static/img/tg.png' width="10" height="10"> [Телеграм](https://t.me/ihmatullaev) <img src='./static/img/linkedin.png' width="10" height="10"> [LinkedIn](https://www.linkedin.com/in/davron-ikhmatullaev/)
+2. Роман Вяткин.
+3. Ярослав Баймлер.
+4. Дмитрий Косачев.
+5. Вероника Заславская.
 ---
 
 ## Описание проекта:
