@@ -140,78 +140,78 @@ async def generate_image(prompt, n=1, size="1024x1024") -> list[str]:
         return urls
 
     
-async def find_user(user_id: int) -> bool:
-    '''
-    Find user in json DB
-    '''
-    json_data = json.load(open("db.json"))
-    for data in json_data:
-        if user_id == data['user_id']:
-            return True
-    return False
+# async def find_user(user_id: int) -> bool:
+#     '''
+#     Find user in json DB
+#     '''
+#     json_data = json.load(open("db.json"))
+#     for data in json_data:
+#         if user_id == data['user_id']:
+#             return True
+#     return False
 
-async def get_user_data(user_id: int) -> dict:
-    '''
-    Find user in json DB and return data about user if exists
-    '''
-    print(f"\nGetting data for user: {user_id}...\n")
-    json_data = json.load(open("db.json"))
-    for data in json_data:
-        if type(data) is  dict:
-            if user_id == data.get('user_id'):
-                print(f"\nGot data for user {user_id}...\n")
-                return data
-        else:
-            print(f"Not valid data type...{type(data)}")
-    return None
+# async def get_user_data(user_id: int) -> dict:
+#     '''
+#     Find user in json DB and return data about user if exists
+#     '''
+#     print(f"\nGetting data for user: {user_id}...\n")
+#     json_data = json.load(open("db.json"))
+#     for data in json_data:
+#         if type(data) is  dict:
+#             if user_id == data.get('user_id'):
+#                 print(f"\nGot data for user {user_id}...\n")
+#                 return data
+#         else:
+#             print(f"Not valid data type...{type(data)}")
+#     return None
 
-async def update_user_data(new_data: dict, user_id: int) -> bool:
-    '''
-    Find user in json DB
-    '''
-    json_data = json.load(open("db.json", encoding='utf8'))
-    print(f"\nUpdating data for user: {user_id}...\n")
-    for i, data in enumerate(json_data):
-        if type(data) is dict and type(new_data) is dict:
-            if user_id == data.get('user_id'):
-                json_data[i].update(new_data)
-                with open("db.json", "w", encoding='utf8') as outfile:
-                    json.dump(json_data, outfile, ensure_ascii=False)
-                print(f'\nDict fo user {user_id} Updated!\n')
-                return True 
+# async def update_user_data(new_data: dict, user_id: int) -> bool:
+#     '''
+#     Find user in json DB
+#     '''
+#     json_data = json.load(open("db.json", encoding='utf8'))
+#     print(f"\nUpdating data for user: {user_id}...\n")
+#     for i, data in enumerate(json_data):
+#         if type(data) is dict and type(new_data) is dict:
+#             if user_id == data.get('user_id'):
+#                 json_data[i].update(new_data)
+#                 with open("db.json", "w", encoding='utf8') as outfile:
+#                     json.dump(json_data, outfile, ensure_ascii=False)
+#                 print(f'\nDict fo user {user_id} Updated!\n')
+#                 return True 
         
-    json_data.append(new_data)
-    with open("db.json", "w", encoding='utf8') as outfile:
-        json.dump(json_data, outfile, ensure_ascii=False)
-    return False
+#     json_data.append(new_data)
+#     with open("db.json", "w", encoding='utf8') as outfile:
+#         json.dump(json_data, outfile, ensure_ascii=False)
+#     return False
 
-async def add_new_user_data(user_data: dict, user_id: int) -> bool:
-    '''
-    Find user in json DB
-    '''
-    json_data = json.load(open("db.json", encoding='utf8'))
+# async def add_new_user_data(user_data: dict, user_id: int) -> bool:
+#     '''
+#     Find user in json DB
+#     '''
+#     json_data = json.load(open("db.json", encoding='utf8'))
     
-    for i, data in enumerate(json_data):
-        if type(data) is  dict:
-            if user_id == data.get('user_id'):
-                return None
+#     for i, data in enumerate(json_data):
+#         if type(data) is  dict:
+#             if user_id == data.get('user_id'):
+#                 return None
         
-    json_data.append(user_data)
-    with open("db.json", "w", encoding='utf8') as outfile:
-        json.dump(json_data, outfile, ensure_ascii=False)
-    return True
+#     json_data.append(user_data)
+#     with open("db.json", "w", encoding='utf8') as outfile:
+#         json.dump(json_data, outfile, ensure_ascii=False)
+#     return True
 
-async def add_last_question(question: dict, user_id: int) -> bool:
-    '''
-    Find user in json DB
-    '''
-    json_data = json.load(open("db.json", encoding='utf8'))
+# async def add_last_question(question: dict, user_id: int) -> bool:
+#     '''
+#     Find user in json DB
+#     '''
+#     json_data = json.load(open("db.json", encoding='utf8'))
     
-    for i, data in enumerate(json_data):
-        if type(data) is  dict:
-            if user_id == data.get('user_id'):
-                json_data[i]['last_question'] = question
-                with open("db.json", "w", encoding='utf8') as outfile:
-                    json.dump(json_data, outfile, ensure_ascii=False)
-                print(f'Last question for user {user_id} Updated!')
-                return True 
+#     for i, data in enumerate(json_data):
+#         if type(data) is  dict:
+#             if user_id == data.get('user_id'):
+#                 json_data[i]['last_question'] = question
+#                 with open("db.json", "w", encoding='utf8') as outfile:
+#                     json.dump(json_data, outfile, ensure_ascii=False)
+#                 print(f'Last question for user {user_id} Updated!')
+#                 return True 
