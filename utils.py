@@ -54,12 +54,12 @@ async def prompt_to_dude(prompt, userdata) -> dict:
     try:
         last_question = userdata["last_question"]
         del userdata["last_question"]
-        intro_rule = "Ты знаменитый  журналист!! Я твой собедник!! Ты берешь у меня интервью уже пол часа. Ты задаешь мне вопросы, я на них отвечаю."
+        intro_rule = "Ты мой друг (бро)!! Я твой лучший друг (бро)!! Ты берешь у меня интервью уже пол часа. Ты задаешь мне вопросы, я на них отвечаю. Ты должен узнать какие ночные клубы, мероприятия мне нравятся. Какой жанр музыки, особенно в техно направлении, мне нравится"
         question = f"Вот твой последний вопрос:  {last_question} \n"
         user_message = f"\n Вот мой ответ на этот вопрос:  {prompt}. \n"
         user_dict = f"Также я тебе дам  Python словарь, где приведена информация которой ты обладаешь обо мне на текущий момент.:  \n \
                    ```{userdata}```\n"
-        final_rule = "Твои следующие действия: \n1) Никогда не приветствоваться со мной (Don't say me Hello). Мы уже на середине интервью. \n 2)  Прокомментируй мой ответ: если он был по теме твоего вопроса, то задавай уточняющий вопрос, если нужно, если нет то смени тему чтобы заполнить другую информацию обо мне (например, мой возраст, пол, мои любимые города, интересы, какие мероприятия я бы хотел посещать, какие сериалы и фильмы люблю). если ответ был не потеме твоего вопроса, то отшутись по этому поводу и задай другой вопрос по теме \n 4) Если есть какая то информация в словаре, уточни эту информацию обо мне (Например,например, мой возраст, пол, мои любимые города, интересы, мои филмьы и сериалы) \n P.S.: Добавляй emojies в свой текст"
+        final_rule = "Твои следующие действия: \n1) Расскажи шутку о тусовках и прочее. (Never say me Hello).\n 2)  Прокомментируй мой ответ: если он был по теме твоего вопроса, то задавай уточняющий вопрос, если нужно, если нет то смени тему чтобы заполнить другую информацию обо мне (например, мой возраст, пол, мои любимые музыкальные жанры, техно жанры, любимые техно-артисты, любимые ночные клубы, бары, тусовки). если ответ был не потеме твоего вопроса, то отшутись по этому поводу и задай другой вопрос по теме \n 4) Если есть какая то информация в словаре, уточни эту информацию обо мне (например, мои любимые музыкальные жанры, техно жанры, любимые техно-артисты, любимые ночные клубы, бары, тусовки) \n P.S.: Добавляй emojies в свой текст"
         full_message = [
             {
                 "role": "user",
@@ -99,7 +99,7 @@ async def prompt_to_dict_changer(prompt, userdata) -> dict:
         user_message = f"\n \n Interviewee's answer to this question:   {prompt}. \n"
         user_dict = f"User data dictionary: \n \
                    ```{userdata}```\n"
-        final_rule = "Your actions: 1) Extract keywords (my interests, my favorite things and info about Interviewee) from the answer. 2) Update dictionary items with the found information (Only update existing keys like a age, sex, my_city, favirite_sports, favorite_countries, favorite_cities, user_interests, topics_history, about_me)  4) Don't create new keys in dictionary. 3) Send me the updated dictionary in the format \{new_dict\}. Nothing extra!"
+        final_rule = "Your actions: 1) Extract keywords (my favorite music_genres, techno_music_genres, favorite_techno_music_artists, favorite_night_clubs, favorite_bars, current_location_address) from the answer. 2) Update dictionary items with the found information (Only update existing keys like a age, sex, music_genres, techno_music_genres, favorite_techno_music_artists, favorite_night_clubs, favorite_bars, current_location_address)  4) Don't create new keys in dictionary. 3) Send me the updated dictionary in the format \{new_dict\}. Nothing extra!"
         full_message = [
             {
                 "role": "user",
