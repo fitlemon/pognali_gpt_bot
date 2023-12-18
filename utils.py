@@ -122,7 +122,9 @@ async def prompt_to_dict_changer(prompt, userdata) -> dict:
         )
         try:
             json_data = json.loads(
-                response["choices"][0]["message"]["content"].replace("'", '"')
+                response["choices"][0]["message"]["content"]
+                .replace("'", '"')
+                .replace("`", "")
             )
             print(json_data)
         except json.JSONDecodeError as e:
