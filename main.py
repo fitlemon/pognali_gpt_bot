@@ -9,12 +9,14 @@ from aiogram.types import BotCommand
 
 
 from handlers import router
+from psycopg2.extras import Json
+from psycopg2.extensions import register_adapter
 
-#import env config file
+register_adapter(dict, Json)
+# import env config file
 env = Env()
 env.read_env()
 
-   
 
 async def main():
     bot = Bot(token=env("BOT_TOKEN"), parse_mode=ParseMode.HTML)
