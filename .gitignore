@@ -3,3 +3,5 @@
 db.json
 logging.txt
 __pycache__/
+ml/
+tables/

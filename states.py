@@ -1,10 +1,17 @@
 from aiogram.fsm.state import StatesGroup, State
 
-class Gen(StatesGroup):    
-    text_prompt = State()
-    img_prompt = State()
-    registered = State()
-    event_list_prompt = State()
+
+class Gen(StatesGroup):
     initial_state = State()
+    where_to_go = State()
     update_info = State()
-  
+    events = State()
+    events_by_genre = State()
+    events_by_location = State()
+    events_popular = State()
+    events_recomend = State()
+    venues = State()
+    venues_by_genre = State()
+    venues_by_location = State()
+    venues_popular = State()
+    venues_recomend = State()
