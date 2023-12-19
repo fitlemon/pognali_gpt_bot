@@ -7,8 +7,6 @@ from environs import Env
 import psycopg2
 from psycopg2.extras import DictCursor
 from sentence_transformers import SentenceTransformer, util
-import numpy as np
-import pandas as pd
 
 
 # import env config file
