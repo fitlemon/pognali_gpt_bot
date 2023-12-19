@@ -12,7 +12,9 @@ from sentence_transformers import SentenceTransformer, util
 # import env config file
 env = Env()
 env.read_env()
-model = SentenceTransformer("sberbank-ai/sbert_large_nlu_ru")
+model = SentenceTransformer(
+    "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2"
+)
 
 
 ## Rangeer events by sementics compatibility
