@@ -11,7 +11,14 @@ import text
 
 from aiogram import flags
 from aiogram.fsm.context import FSMContext
-from aiogram.utils.keyboard import ReplyKeyboardBuilder
+from aiogram.utils.keyboard import ReplyKeyboardBuilder, InlineKeyboardBuilder
+from aiogram.types import (
+    InlineKeyboardButton,
+    InlineKeyboardMarkup,
+    KeyboardButton,
+    ReplyKeyboardMarkup,
+    ReplyKeyboardRemove,
+)
 import utils
 import users
 from states import Gen
@@ -72,10 +79,110 @@ async def events_menu(clbck: CallbackQuery, state: FSMContext):
 
 
 # Handler for catch "Events by genres" button pushing
-@router.callback_query(F.data == "events_by_genre")
+@router.callback_query(
+    lambda call: call.data == "events_by_genre" or call.data == "events_by_genre_next"
+)
 async def events_by_genre_menu(clbck: CallbackQuery, state: FSMContext):
     await state.set_state(Gen.events_by_genre)
-    await clbck.message.answer(text.events_by_genre)
+    tags = await utils.get_random_genres()
+    tags_kb = []
+    if tags is None:
+        return None
+    print(tags)
+    for i in range(0, len(tags), 2):
+        row = [
+            InlineKeyboardButton(
+                text=f"{tags[i][0]}", callback_data=f"events_by_genre_{tags[i][1]}"
+            ),
+            InlineKeyboardButton(
+                text=f"{tags[i+1][0]}",
+                callback_data=f"events_by_genre_{tags[i+1][1]}",
+            ),
+        ]
+        tags_kb.append(row)
+    next_random_kb = [
+        InlineKeyboardButton(
+            text="🔄 Посмотреть еще жанры",
+            callback_data="events_by_genre_next",
+        )
+    ]
+    tags_kb.append(next_random_kb)
+    back_kb = [InlineKeyboardButton(text="⬅️ Назад", callback_data="events")]
+    tags_kb.append(back_kb)
+    tags_kb = InlineKeyboardMarkup(inline_keyboard=tags_kb)
+    await clbck.message.edit_text(text.events_by_genre, reply_markup=tags_kb)
+
+
+# Handler for catch "Specific genre" button pushing
+@router.callback_query(F.data.contains("events_by_genre_"))
+async def events_by_spec_genre(clbck: CallbackQuery, state: FSMContext):
+    print(clbck.data)
+    genre = clbck.data[16:]
+    events = await utils.get_upcoming_events_by_tag(genre)
+    intro = f"<b>Нашёл следующие мероприятия по жанру {genre}:</b>"
+    message_text = []
+    message_text.append(intro)
+    if events:
+        for enum, event in enumerate(events[:5]):
+            event_text = f"🔸<b>{enum+1}</b>). <i>{event[1]}</i>.\n"
+            tags_text = f"""Tags: {str([f'#{str(tag).replace(" ", "_")} ' for tag in event[2].split(', ')])}\n"""
+            message_text.append(event_text)
+            message_text.append(tags_text)
+            back_kb = [
+                [InlineKeyboardButton(text="⬅️ Назад", callback_data="events_by_genre")]
+            ]
+
+            back_kb = InlineKeyboardMarkup(inline_keyboard=back_kb)
+        await clbck.message.answer("\n".join(message_text), reply_markup=back_kb)
+    else:
+        await clbck.message.answer("Мероприятия не найдены(", parse_mode="html")
+
+
+# Catch messagee in "Events by genre" state
+@router.message(Gen.events_by_genre)
+async def events_by_genre_user_query(msg: Message):
+    """
+    Handler that give events by user query in Events by genre state
+    Args:
+        msg (Message): User message
+    """
+    await msg.answer("🔎 Ищу мероприятия для тебя...")
+    # upcoming_events = await utils.get_upcoming_events("description")  # get_text_from_events
+    upcoming_events = await utils.get_events_tags()  # get events with their tags
+    events_tags = [(id, tags) for id, name, tags in upcoming_events]
+    print("Upcomin events:", upcoming_events)
+    await bot.send_chat_action(chat_id=msg.chat.id, action="typing")
+    best_scored = await utils.rangeer(
+        events_tags, msg.text
+    )  # rangeer events with user text (Context recommendation)
+    print("Best scored: ", best_scored)
+    best_ids = tuple((id for id, tag, score in best_scored))
+    best_events = [
+        (id, title, tags)
+        for best_id in best_ids
+        for id, title, tags in upcoming_events
+        if best_id == id
+    ]
+    # best_events = await utils.get_upcoming_events_by_id(best_ids, ["title"])
+    print("Best events:", best_events)
+    message_text = []
+    intro = "<b>Нашёл следующие мероприятия по запросу:</b>"
+    message_text.append(intro)
+    if upcoming_events:
+        for enum, event in enumerate(best_events):
+            event_text = f"🔸<b>{enum+1}</b>). <i>{event[1]}</i>.\n"
+            tags_text = f"""Tags: {str([f'#{str(tag).replace(" ", "_")} ' for tag in event[2].split(', ')])}\n"""
+            message_text.append(event_text)
+            message_text.append(tags_text)
+            best_ids
+        back_kb = [
+            [InlineKeyboardButton(text="⬅️ Назад", callback_data="events_by_genre")]
+        ]
+
+        back_kb = InlineKeyboardMarkup(inline_keyboard=back_kb)
+        await msg.answer("\n".join(message_text), reply_markup=back_kb)
+    else:
+        await msg.answer("Мероприятия не найдены(", parse_mode="html")
 
 
 # Handler for catch "Events by location" button pushing
@@ -83,6 +190,8 @@ async def events_by_genre_menu(clbck: CallbackQuery, state: FSMContext):
 async def events_by_location_menu(clbck: CallbackQuery, state: FSMContext):
     await state.set_state(Gen.events_by_location)
     await clbck.message.answer(text.events_by_location)
+    await state.set_state(Gen.events_by_genre)
+    tags = await utils.get_random_genres()
 
 
 # Handler for catch "Popular events" button pushing

@@ -64,6 +64,11 @@ events = [
     ],
     [
         InlineKeyboardButton(
+            text="✏️ Мероприятия по запросу", callback_data="events_by_user"
+        )
+    ],
+    [
+        InlineKeyboardButton(
             text="🚩 Мероприятия поблизости", callback_data="events_by_location"
         )
     ],

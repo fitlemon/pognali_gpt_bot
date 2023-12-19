@@ -1,14 +1,42 @@
 import openai
 import logging
-import config
 import datetime
 import json
 from pprint import pprint
 from environs import Env
+import psycopg2
+from psycopg2.extras import DictCursor
+from sentence_transformers import SentenceTransformer, util
+import numpy as np
+import pandas as pd
+
 
 # import env config file
 env = Env()
 env.read_env()
+model = SentenceTransformer("sberbank-ai/sbert_large_nlu_ru")
+
+
+## Rangeer events by sementics compatibility
+async def rangeer(events_text, user_text, count=5):
+    print("\n\n\nScoring rangeer between:")
+    print("\nUser context:", user_text)
+    print("\nEvents/venues context:", events_text)
+    print("\n\n\n")
+    embedding_user = model.encode(user_text, convert_to_tensor=True)
+    cosine_scores = []
+    for id, text in events_text:
+        if text == "":
+            continue
+        embedding_event = model.encode(str(text), convert_to_tensor=True)
+        # compute similarity scores of two embeddings
+        cosine_score = util.pytorch_cos_sim(embedding_user, embedding_event)
+        cosine_scores.append([id, text, cosine_score])
+    # print(sorted(cosine_scores, reverse=True, key=lambda x: x[2]))
+    best_cosine_scores = sorted(cosine_scores, reverse=True, key=lambda x: x[2])[:count]
+    print(best_cosine_scores)
+    return best_cosine_scores
+
 
 openai.api_key = env("OPENAI_TOKEN")
 max_token_count = 4096
@@ -19,6 +47,13 @@ logging.basicConfig(
     datefmt="%H:%M:%S",
     level=logging.DEBUG,
 )
+
+connect_params = {
+    "dbname": env("DB_NAME"),
+    "user": env("DB_USER"),
+    "password": env("DB_PASSWORD"),
+    "host": env("DB_HOST"),
+}
 
 # async def update_info_prompt(prompt, userdata) -> dict:
 #     try:
@@ -168,91 +203,146 @@ async def generate_events_list(userdata) -> dict:
         logging.error(e)
 
 
-async def generate_image(prompt, n=1, size="1024x1024") -> list[str]:
-    try:
-        response = await openai.Image.acreate(prompt=prompt, n=n, size=size)
-        urls = []
-        for i in response["data"]:
-            urls.append(i["url"])
-    except Exception as e:
-        logging.error(e)
-        return []
-    else:
-        return urls
+# Get 6 randon tags from DB
+# #  SELECT *
+#   FROM data_set
+#   ORDER BY random()
+#   LIMIT 6;
+async def get_random_genres():
+    """
+    get Random 6 tags to show
+    """
+    with psycopg2.connect(**connect_params) as conn:
+        try:
+            with conn.cursor(cursor_factory=DictCursor) as cursor:
+                cursor.execute(f"SELECT name, slug FROM tags ORDER BY random() LIMIT 6")
+                q = cursor.fetchall()
+                if q == None:
+                    print(f"Tags weren't found")
+                    return None
+                tags = q
+            print(tags)
+            print(f"\nGot tags...\n")
+            print("Random tags are:", tags)
+        except (Exception, psycopg2.DatabaseError) as error:
+            print(error)
+        return tags
 
 
-# async def find_user(user_id: int) -> bool:
-#     '''
-#     Find user in json DB
-#     '''
-#     json_data = json.load(open("db.json"))
-#     for data in json_data:
-#         if user_id == data['user_id']:
-#             return True
-#     return False
+# Get upcoming events by date
+async def get_upcoming_events_by_date(col: str) -> list:
+    """_summary_
 
-# async def get_user_data(user_id: int) -> dict:
-#     '''
-#     Find user in json DB and return data about user if exists
-#     '''
-#     print(f"\nGetting data for user: {user_id}...\n")
-#     json_data = json.load(open("db.json"))
-#     for data in json_data:
-#         if type(data) is  dict:
-#             if user_id == data.get('user_id'):
-#                 print(f"\nGot data for user {user_id}...\n")
-#                 return data
-#         else:
-#             print(f"Not valid data type...{type(data)}")
-#     return None
+    Args:
+        col (str): name of column to return
 
-# async def update_user_data(new_data: dict, user_id: int) -> bool:
-#     '''
-#     Find user in json DB
-#     '''
-#     json_data = json.load(open("db.json", encoding='utf8'))
-#     print(f"\nUpdating data for user: {user_id}...\n")
-#     for i, data in enumerate(json_data):
-#         if type(data) is dict and type(new_data) is dict:
-#             if user_id == data.get('user_id'):
-#                 json_data[i].update(new_data)
-#                 with open("db.json", "w", encoding='utf8') as outfile:
-#                     json.dump(json_data, outfile, ensure_ascii=False)
-#                 print(f'\nDict fo user {user_id} Updated!\n')
-#                 return True
+    Returns:
+        list: [id, column]
+    """
+    current_date = "2023-10-01"  # For test imitate now date
+    with psycopg2.connect(**connect_params) as conn:
+        try:
+            with conn.cursor(cursor_factory=DictCursor) as cursor:
+                cursor.execute(
+                    f"SELECT id, {col} FROM events WHERE start_date > '{current_date}'"
+                )
+                q = cursor.fetchall()
+                if q == None:
+                    print(f"Tags weren't found")
+                data = q
+            print(f"\nGot {len(data)} events...\n")
+            data = [
+                [x, y.replace("<br>", "\n").replace("<p>", "").replace("</p>", "")]
+                for x, y in data
+            ]
+        except (Exception, psycopg2.DatabaseError) as error:
+            print(error)
+        return data
 
-#     json_data.append(new_data)
-#     with open("db.json", "w", encoding='utf8') as outfile:
-#         json.dump(json_data, outfile, ensure_ascii=False)
-#     return False
 
-# async def add_new_user_data(user_data: dict, user_id: int) -> bool:
-#     '''
-#     Find user in json DB
-#     '''
-#     json_data = json.load(open("db.json", encoding='utf8'))
+# Get upcoming events by id
+async def get_upcoming_events_by_id(ids: tuple, columns: list) -> list:
+    """_summary_
 
-#     for i, data in enumerate(json_data):
-#         if type(data) is  dict:
-#             if user_id == data.get('user_id'):
-#                 return None
+    Args:
+        ids (tuple): Tuple of ids that need to return
+        idcolumns (list): List of columns to select
 
-#     json_data.append(user_data)
-#     with open("db.json", "w", encoding='utf8') as outfile:
-#         json.dump(json_data, outfile, ensure_ascii=False)
-#     return True
+    Returns:
+        list: [id, *column]
+    """
+    current_date = "2023-10-01"  # For test imitate now date
+    with psycopg2.connect(**connect_params) as conn:
+        try:
+            with conn.cursor(cursor_factory=DictCursor) as cursor:
+                query = f"SELECT id, {', '.join(columns)} FROM events WHERE id in {ids}"
+                print(query)
+                cursor.execute(query)
+                q = cursor.fetchall()
+                if q == None:
+                    print(f"Tags weren't found")
+                    return None
+                data = q
+            print(f"\nGot {len(data)} events...\n")
+            print("Events are:", data)
+        except (Exception, psycopg2.DatabaseError) as error:
+            print(error)
+        return data
 
-# async def add_last_question(question: dict, user_id: int) -> bool:
-#     '''
-#     Find user in json DB
-#     '''
-#     json_data = json.load(open("db.json", encoding='utf8'))
 
-#     for i, data in enumerate(json_data):
-#         if type(data) is  dict:
-#             if user_id == data.get('user_id'):
-#                 json_data[i]['last_question'] = question
-#                 with open("db.json", "w", encoding='utf8') as outfile:
-#                     json.dump(json_data, outfile, ensure_ascii=False)
-#                 print(f'Last question for user {user_id} Updated!')
-#                 return True
+# Get upcoming events by tag
+async def get_events_tags() -> list:
+    """_summary_
+
+    Args:
+        ids (tuple): Tuple of ids that need to return
+
+    Returns:
+        list: [id, *column]
+    """
+    current_date = "2023-10-01"  # For test imitate now date
+    with psycopg2.connect(**connect_params) as conn:
+        try:
+            with conn.cursor(cursor_factory=DictCursor) as cursor:
+                query = f"SELECT events.id, title, CONCAT(STRING_AGG(name, ', '), ', ', STRING_AGG(name_rus, ', ')) as tags FROM events INNER JOIN taggable ON events.id = taggable.taggable_id LEFT JOIN tags on taggable.tag_id = tags.id WHERE taggable_type like '%Event%' and events.start_date > '{current_date}' GROUP By events.id;  "
+                print(query)
+                cursor.execute(query)
+                q = cursor.fetchall()
+                if q == None:
+                    print(f"Tags weren't found")
+                    return None
+                data = q
+            print(f"\nGot {len(data)} events...\n")
+            print("Events are:", data)
+        except (Exception, psycopg2.DatabaseError) as error:
+            print(error)
+        return data
+
+
+# Get upcoming events by tag
+async def get_upcoming_events_by_tag(tag: str) -> list:
+    """_summary_
+
+    Args:
+        ids (tuple): Tuple of ids that need to return
+
+    Returns:
+        list: [id, *column]
+    """
+    current_date = "2023-10-01"  # For test imitate now date
+    with psycopg2.connect(**connect_params) as conn:
+        try:
+            with conn.cursor(cursor_factory=DictCursor) as cursor:
+                query = f"SELECT events.id, title, CONCAT(STRING_AGG(name, ', '), ', ', STRING_AGG(name_rus, ', ')) as tags FROM events INNER JOIN taggable ON events.id = taggable.taggable_id LEFT JOIN tags on taggable.tag_id = tags.id WHERE taggable_type like '%Event%' and events.start_date > '{current_date}' and tags.slug like '%{tag}%' GROUP By events.id; "
+                print(query)
+                cursor.execute(query)
+                q = cursor.fetchall()
+                if q == None:
+                    print(f"Tags weren't found")
+                    return None
+                data = q
+            print(f"\nGot {len(data)} events...\n")
+            print("Events are:", data)
+        except (Exception, psycopg2.DatabaseError) as error:
+            print(error)
+        return data

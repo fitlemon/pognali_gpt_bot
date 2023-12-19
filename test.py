@@ -146,10 +146,16 @@ values = ", ".join([str(value) for value in dict_sample.values()])
 query = "INSERT INTO public.users " + columns + " VALUES " + values
 # print(query)
 test = """{'user_id': 400690372, 'user_name': 'ihmatullaev', 'user_firstname': 'Davron', 'user_surname': 'unknown', 'age': 0, 'sex': 'unknown', 'user_city': 'unknown', 'main_music_genres': [''], 'techno_music_genres': [''], 'favorite_techno_music_artists': [''], 'favorite_night_clubs': [''], 'favorite_bars': [''], 'current_location_address': [''], 'current_location_coordinates': '(0,0)'}"""
-print(test[325:339])
-print(test.replace("'", '"'))
-try:
-    json_data = json.loads(test.replace("'", '"'))
-    print(json_data)
-except json.JSONDecodeError as e:
-    print("Invalid JSON syntax:", e)
+# print(test[325:339])
+# print(test.replace("'", '"'))
+# try:
+#     json_data = json.loads(test.replace("'", '"'))
+#     print(json_data)
+# except json.JSONDecodeError as e:
+#     print("Invalid JSON syntax:", e)
+tags = [["Latin Hip-Hop"], ["Deep DnB"], ["Bleep"], ["Full-on"], ["Rave"], ["rock"]]
+tags_kb = []
+for i in range(0, len(tags), 2):
+    row = [tags[i], tags[i + 1]]
+    tags_kb.append(row)
+print(tags_kb)
