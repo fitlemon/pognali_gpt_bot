@@ -222,9 +222,9 @@ async def get_random_genres():
             print(tags)
             print(f"\nGot tags...\n")
             print("Random tags are:", tags)
+            return tags
         except (Exception, psycopg2.DatabaseError) as error:
             print(error)
-        return tags
 
 
 # Get upcoming events by date
@@ -253,9 +253,10 @@ async def get_upcoming_events_by_date(col: str) -> list:
                 [x, y.replace("<br>", "\n").replace("<p>", "").replace("</p>", "")]
                 for x, y in data
             ]
+            return data
+
         except (Exception, psycopg2.DatabaseError) as error:
             print(error)
-        return data
 
 
 # Get upcoming events by id
@@ -283,9 +284,9 @@ async def get_upcoming_events_by_id(ids: tuple, columns: list) -> list:
                 data = q
             print(f"\nGot {len(data)} events...\n")
             print("Events are:", data)
+            return data
         except (Exception, psycopg2.DatabaseError) as error:
             print(error)
-        return data
 
 
 # Get upcoming events by tag
@@ -312,9 +313,9 @@ async def get_events_tags() -> list:
                 data = q
             print(f"\nGot {len(data)} events...\n")
             print("Events are:", data)
+            return data
         except (Exception, psycopg2.DatabaseError) as error:
             print(error)
-        return data
 
 
 # Get upcoming events by tag
@@ -341,6 +342,6 @@ async def get_upcoming_events_by_tag(tag: str) -> list:
                 data = q
             print(f"\nGot {len(data)} events...\n")
             print("Events are:", data)
+            return data
         except (Exception, psycopg2.DatabaseError) as error:
             print(error)
-        return data

@@ -30,3 +30,5 @@ venues_by_location = (
 )
 venues_popular = "Топ 10 заведений"
 venues_recomend = "Заведения, которые могут понравиться тебе"
+
+events_list = "<b>Найдены следующие мероприятия по запросу:</b><br>"
