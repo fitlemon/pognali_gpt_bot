@@ -103,7 +103,6 @@ async def get_user_data(user_id: int) -> dict:
     """
 
     print(f"\nGetting data for user: {user_id}...\n")
-
     with psycopg2.connect(**connect_params) as conn:
         try:
             with conn.cursor(cursor_factory=DictCursor) as cursor:

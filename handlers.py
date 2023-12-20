@@ -56,6 +56,17 @@ async def start_handler(msg: Message, state: FSMContext):
 async def menu(msg: Message, state: FSMContext):
     await state.set_state(Gen.initial_state)  # change State to Initial State
     await msg.answer(text.menu, reply_markup=kb.menu_reg)  # Pop up menu
+    # Create user if he doesnt exist
+    if not users.find_user(msg.from_user.id):
+        data = users.dict_sample.copy()
+        data["user_id"] = msg.from_user.id
+        data["user_name"] = msg.from_user.username
+        data["user_firstname"] = msg.from_user.full_name
+        # initialize the dict of user profile
+
+        await users.add_new_user_data(
+            data, msg.from_user.id
+        )  # add dict of user to json file
 
 
 @router.callback_query(F.data == "main_menu")
