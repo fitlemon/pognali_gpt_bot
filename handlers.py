@@ -57,7 +57,7 @@ async def menu(msg: Message, state: FSMContext):
     await state.set_state(Gen.initial_state)  # change State to Initial State
     await msg.answer(text.menu, reply_markup=kb.menu_reg)  # Pop up menu
     # Create user if he doesnt exist
-    if not users.find_user(msg.from_user.id):
+    if not await users.find_user(msg.from_user.id):
         data = users.dict_sample.copy()
         data["user_id"] = msg.from_user.id
         data["user_name"] = msg.from_user.username
