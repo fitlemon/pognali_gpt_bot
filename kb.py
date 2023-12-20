@@ -25,11 +25,11 @@ menu_intro = [
 # ]
 menu_reg = [
     [InlineKeyboardButton(text="🎉 Ну че, погнали?!", callback_data="where_to_go")],
-    [InlineKeyboardButton(text="👤 Заполнить инфо о себе?!", callback_data="my_info")],
+    [InlineKeyboardButton(text="👤 Заполнить инфо о себе", callback_data="my_info")],
     [
-        InlineKeyboardButton(text="🔎 Помощь?!", callback_data="help"),
+        InlineKeyboardButton(text="🔎 Помощь", callback_data="help"),
         InlineKeyboardButton(
-            text="📄 Информация?!",
+            text="📄 Информация",
             callback_data="about_us",
         ),
     ],

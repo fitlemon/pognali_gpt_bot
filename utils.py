@@ -53,6 +53,8 @@ connect_params = {
     "host": env("DB_HOST"),
 }
 
+current_date = "2023-10-01"  # For test imitate now date
+
 # async def update_info_prompt(prompt, userdata) -> dict:
 #     try:
 #         intro_rule = "Ты интервьюер, ты интересуешься мной и постоянно задаешь вопросы. Вот наш прошлый разговор:\n\n"
@@ -237,7 +239,7 @@ async def get_upcoming_events_by_date(col: str) -> list:
     Returns:
         list: [id, column]
     """
-    current_date = "2023-10-01"  # For test imitate now date
+
     with psycopg2.connect(**connect_params) as conn:
         try:
             with conn.cursor(cursor_factory=DictCursor) as cursor:
@@ -270,7 +272,7 @@ async def get_upcoming_events_by_id(ids: tuple, columns: list) -> list:
     Returns:
         list: [id, *column]
     """
-    current_date = "2023-10-01"  # For test imitate now date
+
     with psycopg2.connect(**connect_params) as conn:
         try:
             with conn.cursor(cursor_factory=DictCursor) as cursor:
@@ -299,7 +301,7 @@ async def get_events_tags() -> list:
     Returns:
         list: [id, *column]
     """
-    current_date = "2023-10-01"  # For test imitate now date
+
     with psycopg2.connect(**connect_params) as conn:
         try:
             with conn.cursor(cursor_factory=DictCursor) as cursor:
@@ -319,20 +321,20 @@ async def get_events_tags() -> list:
 
 
 # Get upcoming events by tag
-async def get_upcoming_events_by_tag(tag: str) -> list:
+async def get_upcoming_events_ids_by_tag(tag: str) -> list:
     """_summary_
 
     Args:
         ids (tuple): Tuple of ids that need to return
 
     Returns:
-        list: [id, *column]
+        list: (ids)
     """
-    current_date = "2023-10-01"  # For test imitate now date
+
     with psycopg2.connect(**connect_params) as conn:
         try:
             with conn.cursor(cursor_factory=DictCursor) as cursor:
-                query = f"SELECT events.id, title, CONCAT(STRING_AGG(name, ', '), ', ', STRING_AGG(name_rus, ', ')) as tags FROM events INNER JOIN taggable ON events.id = taggable.taggable_id LEFT JOIN tags on taggable.tag_id = tags.id WHERE taggable_type like '%Event%' and events.start_date > '{current_date}' and tags.slug like '%{tag}%' GROUP By events.id; "
+                query = f"SELECT events.id FROM events INNER JOIN taggable ON events.id = taggable.taggable_id LEFT JOIN tags on taggable.tag_id = tags.id WHERE taggable_type like '%Event%' and events.start_date > '{current_date}' and tags.slug like '%{tag}%' GROUP By events.id; "
                 print(query)
                 cursor.execute(query)
                 q = cursor.fetchall()
@@ -345,3 +347,32 @@ async def get_upcoming_events_by_tag(tag: str) -> list:
             return data
         except (Exception, psycopg2.DatabaseError) as error:
             print(error)
+
+
+# Get upcoming events (with tags) by id
+async def get_upcoming_events_with_tags_by_id(ids: tuple, columns: list) -> list:
+    """Return list of events by given ids
+
+    Args:
+        ids (tuple): fiven list of id
+        columns (list): which columns should extract
+
+    Returns:
+        list: list of events
+    """
+    with psycopg2.connect(**connect_params) as conn:
+        try:
+            with conn.cursor(cursor_factory=DictCursor) as cursor:
+                query = f"SELECT events.id, {', '.join(columns)}, CONCAT(STRING_AGG(name, ', '), ', ', STRING_AGG(name_rus, ', ')) as event_tags FROM events LEFT JOIN taggable ON events.id = taggable.taggable_id LEFT JOIN tags on taggable.tag_id = tags.id WHERE taggable_type like '%Event%' and events.start_date > '{current_date}' and events.id in {str(ids).replace('[', '(').replace(']', ')')} GROUP By events.id;"
+                print(query)
+                cursor.execute(query)
+                q = cursor.fetchall()
+                if q == None:
+                    print(f"Tags weren't found")
+                data = q
+            print(f"\nGot {len(data)} events...\n")
+            print("Events are:", data)
+            return data
+        except (Exception, psycopg2.DatabaseError) as error:
+            print(error)
+    return None

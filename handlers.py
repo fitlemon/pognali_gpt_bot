@@ -129,22 +129,48 @@ async def events_by_genre_menu(clbck: CallbackQuery, state: FSMContext):
 async def events_by_spec_genre(clbck: CallbackQuery, state: FSMContext):
     print(clbck.data)
     genre = clbck.data[16:]
-    events = await utils.get_upcoming_events_by_tag(genre)
+    events_ids = await utils.get_upcoming_events_ids_by_tag(genre)
+    if not events_ids:
+        await clbck.message.answer("Мероприятия не найдены(", parse_mode="html")
+        return None
+    events = await utils.get_upcoming_events_with_tags_by_id(
+        events_ids, ["title", "description", "start_date", "info_url", "price_from"]
+    )  # get ids, *columns* tags from eventss
     intro = f"<b>Нашёл следующие мероприятия по жанру {genre}:</b>"
     message_text = []
     message_text.append(intro)
     if events:
         for enum, event in enumerate(events[:5]):
-            event_text = f"🔸<b>{enum+1}</b>). <i>{event[1]}</i>.\n"
-            tags_text = f"""Tags: {str([f'#{str(tag).replace(" ", "_")} ' for tag in event[2].split(', ')])}\n"""
-            message_text.append(event_text)
-            message_text.append(tags_text)
-            back_kb = [
-                [InlineKeyboardButton(text="⬅️ Назад", callback_data="events_by_genre")]
-            ]
+            print(event)
+            message_text.append(f"🔸<b>{enum+1}</b>) <i>{event[1]}</i>.\n")
+            if event[4]:
+                message_text.append(f"🔗 Сайт для информации: {event[4]}\n")
+            message_text.append(f"📅 Начало мероприятия: {event[3]}\n")
+            if event[5]:
+                message_text.append(f"💵 Цены от: {event[5]}\n")
+            if event[6]:
+                message_text.append(
+                    f"""Tags: {str([f'#{str(tag).lower().replace(" ", "_").replace("-", "_")} ' for tag in event[6].split(', ')])}\n"""
+                )
+        offer_text = (
+            "_" * 35
+            + "\n"
+            + "💡 Если не нашел подходящие именно тебе мероприятия...Расскажи немного о себе нейросети 💬. И она найдет тебе самые релевантные"
+        )
+        message_text.append(offer_text)
+        full_kb = []
+        offer_kb = [
+            InlineKeyboardButton(text="👤 Рассказать о себе ИИ", callback_data="my_info")
+        ]
 
-            back_kb = InlineKeyboardMarkup(inline_keyboard=back_kb)
-        await clbck.message.answer("\n".join(message_text), reply_markup=back_kb)
+        back_kb = [
+            InlineKeyboardButton(text="⬅️ Назад", callback_data="events_by_genre")
+        ]
+
+        full_kb.append(offer_kb)
+        full_kb.append(back_kb)
+        full_kb = InlineKeyboardMarkup(inline_keyboard=full_kb)
+        await clbck.message.answer("\n".join(message_text), reply_markup=full_kb)
     else:
         await clbck.message.answer("Мероприятия не найдены(", parse_mode="html")
 
@@ -168,30 +194,48 @@ async def events_by_genre_user_query(msg: Message):
     )  # rangeer events with user text (Context recommendation)
     print("Best scored: ", best_scored)
     best_ids = tuple((id for id, tag, score in best_scored))
-    best_events = [
-        (id, title, tags)
-        for best_id in best_ids
-        for id, title, tags in upcoming_events
-        if best_id == id
-    ]
-    # best_events = await utils.get_upcoming_events_by_id(best_ids, ["title"])
-    print("Best events:", best_events)
+    if not best_ids:
+        await msg.answer("Мероприятия не найдены(", parse_mode="html")
+        return None
+    events = await utils.get_upcoming_events_with_tags_by_id(
+        best_ids, ["title", "description", "start_date", "info_url", "price_from"]
+    )  # get ids, *columns* tags from eventss
+    intro = f"<b>Нашёл следующие мероприятия по твоему запросу:</b>"
     message_text = []
-    intro = "<b>Нашёл следующие мероприятия по запросу:</b>"
     message_text.append(intro)
-    if upcoming_events:
-        for enum, event in enumerate(best_events):
-            event_text = f"🔸<b>{enum+1}</b>). <i>{event[1]}</i>.\n"
-            tags_text = f"""Tags: {str([f'#{str(tag).replace(" ", "_")} ' for tag in event[2].split(', ')])}\n"""
-            message_text.append(event_text)
-            message_text.append(tags_text)
-            best_ids
-        back_kb = [
-            [InlineKeyboardButton(text="⬅️ Назад", callback_data="events_by_genre")]
+    if events:
+        for enum, event in enumerate(events[:5]):
+            print(event)
+            message_text.append(f"🔸<b>{enum+1}</b>) <i>{event[1]}</i>.\n")
+            if event[4]:
+                message_text.append(f"🔗 Сайт для информации: {event[4]}\n")
+            message_text.append(f"📅 Начало мероприятия: {event[3]}\n")
+            if event[5]:
+                message_text.append(f"💵 Цены от: {event[5]}\n")
+            if event[6]:
+                message_text.append(
+                    f"""Tags: {str([f'#{str(tag).lower().replace(" ", "_").replace("-", "_")} ' for tag in event[6].split(', ')])}\n"""
+                )
+
+        offer_text = (
+            "_" * 35
+            + "\n"
+            + "💡 Если не нашел подходящие именно тебе мероприятия...Расскажи немного о себе нейросети 💬. И она найдет тебе самые релевантные"
+        )
+        message_text.append(offer_text)
+        full_kb = []
+        offer_kb = [
+            InlineKeyboardButton(text="👤 Рассказать о себе ИИ", callback_data="my_info")
         ]
 
-        back_kb = InlineKeyboardMarkup(inline_keyboard=back_kb)
-        await msg.answer("\n".join(message_text), reply_markup=back_kb)
+        back_kb = [
+            InlineKeyboardButton(text="⬅️ Назад", callback_data="events_by_genre")
+        ]
+
+        full_kb.append(offer_kb)
+        full_kb.append(back_kb)
+        full_kb = InlineKeyboardMarkup(inline_keyboard=full_kb)
+        await msg.answer("\n".join(message_text), reply_markup=full_kb)
     else:
         await msg.answer("Мероприятия не найдены(", parse_mode="html")
 
