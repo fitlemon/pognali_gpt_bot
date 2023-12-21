@@ -64,7 +64,13 @@ events = [
     ],
     [
         InlineKeyboardButton(
-            text="✏️ Мероприятия по запросу", callback_data="events_by_user"
+            text="✏️ Мероприятия по запросу", callback_data="events_by_desc"
+        )
+    ],
+    [
+        InlineKeyboardButton(
+            text="✏️ 👤 Мероприятия по запросу и интересам",
+            callback_data="events_by_desc_and_user_data",
         )
     ],
     [
@@ -79,7 +85,14 @@ events = [
     ],
     [
         InlineKeyboardButton(
-            text="💚 Рекомендованные мне", callback_data="events_recomend"
+            text="💚 Рекомендованные мне (описание)",
+            callback_data="events_recomend_by_desc",
+        )
+    ],
+    [
+        InlineKeyboardButton(
+            text="💚 Рекомендованные мне (описания+тэги) #️⃣ ",
+            callback_data="events_recomend_by_desc_tags",
         )
     ],
     [InlineKeyboardButton(text="⬅️ Назад", callback_data="where_to_go")],

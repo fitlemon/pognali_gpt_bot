@@ -7,6 +7,8 @@ class Gen(StatesGroup):
     update_info = State()
     events = State()
     events_by_genre = State()
+    events_by_desc = State()
+    events_by_desc_and_user_data = State()
     events_by_location = State()
     events_popular = State()
     events_recomend = State()

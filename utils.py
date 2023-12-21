@@ -230,7 +230,7 @@ async def get_random_genres():
 
 
 # Get upcoming events by date
-async def get_upcoming_events_by_date(col: str) -> list:
+async def get_upcoming_events_by_col(col: str) -> list:
     """_summary_
 
     Args:
@@ -364,6 +364,35 @@ async def get_upcoming_events_with_tags_by_id(ids: tuple, columns: list) -> list
         try:
             with conn.cursor(cursor_factory=DictCursor) as cursor:
                 query = f"SELECT events.id, {', '.join(columns)}, CONCAT(STRING_AGG(name, ', '), ', ', STRING_AGG(name_rus, ', ')) as event_tags FROM events LEFT JOIN taggable ON events.id = taggable.taggable_id LEFT JOIN tags on taggable.tag_id = tags.id WHERE taggable_type like '%Event%' and events.start_date > '{current_date}' and events.id in {str(ids).replace('[', '(').replace(']', ')')} GROUP By events.id;"
+                print(query)
+                cursor.execute(query)
+                q = cursor.fetchall()
+                if q == None:
+                    print(f"Tags weren't found")
+                data = q
+            print(f"\nGot {len(data)} events...\n")
+            print("Events are:", data)
+            return data
+        except (Exception, psycopg2.DatabaseError) as error:
+            print(error)
+    return None
+
+
+# Get upcoming events (with tags)
+async def get_upcoming_events_with_tags(columns: list) -> list:
+    """Return list of events by given ids
+
+    Args:
+        ids (tuple): fiven list of id
+        columns (list): which columns should extract
+
+    Returns:
+        list: list of events
+    """
+    with psycopg2.connect(**connect_params) as conn:
+        try:
+            with conn.cursor(cursor_factory=DictCursor) as cursor:
+                query = f"SELECT events.id, {columns}, CONCAT(STRING_AGG(name, ', '), ', ', STRING_AGG(name_rus, ', ')) as event_tags FROM events LEFT JOIN taggable ON events.id = taggable.taggable_id LEFT JOIN tags on taggable.tag_id = tags.id WHERE taggable_type like '%Event%' and events.start_date > '{current_date}' GROUP By events.id;"
                 print(query)
                 cursor.execute(query)
                 q = cursor.fetchall()
