@@ -12,7 +12,7 @@ from sentence_transformers import SentenceTransformer, util
 # import env config file
 env = Env()
 env.read_env()
-model = SentenceTransformer("sentence-transformers/all-MiniLM-L12-v1")
+model = SentenceTransformer("sentence-transformers/all-MiniLM-L6-v2")
 
 
 ## Rangeer events by sementics compatibility
