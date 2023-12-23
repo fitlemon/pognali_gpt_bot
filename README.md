@@ -5,7 +5,7 @@
 
 #### Состав команды: 
 
-1. Роман Вяткин: Scrum-Master/Data Scientist <img src='./static/img/tg.png' width="10" height="10"> [Телеграм](https://t.me/Niktyav)
+1. Роман Вяткин: Scrum-Master/Data Scientist <img src='./static/img/tg.png' width="10" height="10"> [Телеграм](https://t.me/Niktyav) <img src='./static/img/linkedin.png' width="10" height="10"> [LinkedIn](https://www.linkedin.com/in/roman-vyatkin-30782a22a/)
 2. Davron Ikhmatullaev: ML Engineer / DevOps <img src='./static/img/tg.png' width="10" height="10"> [Телеграм](https://t.me/ihmatullaev) <img src='./static/img/linkedin.png' width="10" height="10"> [LinkedIn](https://www.linkedin.com/in/davron-ikhmatullaev/)
 3. Ярослав Баймлер: Документалист / QA Engineer <img src='./static/img/tg.png' width="10" height="10"> [Телеграм](https://t.me/Yar71542)
 4. Дмитрий Косачев: Fullstack-разработчик <img src='./static/img/tg.png' width="10" height="10"> [Телеграм](https://t.me/Kosatchev)
