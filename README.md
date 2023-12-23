@@ -114,6 +114,7 @@
 
 <div style="border: 3px dotted white; padding: 5px; margin-right: auto;  width: 80%;"> 
 
+---
 <b>Следующие планы:</b>
 
 - разработка коллаборативной рексистемы;
