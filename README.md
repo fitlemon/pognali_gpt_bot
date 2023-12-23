@@ -5,11 +5,11 @@
 
 #### Состав команды: 
 
-1. Роман Вяткин: Scrum-Master/Data Scientist (<img src='./static/img/tg.png' width="10" height="10"> [Телеграм](https://t.me/Niktyav))
+1. Роман Вяткин: Scrum-Master/Data Scientist <img src='./static/img/tg.png' width="10" height="10"> [Телеграм](https://t.me/Niktyav)
 2. Davron Ikhmatullaev: ML Engineer / DevOps <img src='./static/img/tg.png' width="10" height="10"> [Телеграм](https://t.me/ihmatullaev) <img src='./static/img/linkedin.png' width="10" height="10"> [LinkedIn](https://www.linkedin.com/in/davron-ikhmatullaev/)
-3. Ярослав Баймлер: Документалист / технический писатель (<img src='./static/img/tg.png' width="10" height="10"> [Телеграм](https://t.me/Yar71542))
-4. Дмитрий Косачев: Fullstack-разработчик (<img src='./static/img/tg.png' width="10" height="10"> [Телеграм](https://t.me/Kosatchev))
-5. Вероника Заславская: Data Scientist (<img src='./static/img/tg.png' width="10" height="10"> [Телеграм](https://t.me/nika_tonika), [Личный сайт](https://zaslavskaia.ru/))
+3. Ярослав Баймлер: Документалист / QA Engineer <img src='./static/img/tg.png' width="10" height="10"> [Телеграм](https://t.me/Yar71542)
+4. Дмитрий Косачев: Fullstack-разработчик <img src='./static/img/tg.png' width="10" height="10"> [Телеграм](https://t.me/Kosatchev)
+5. Вероника Заславская: Data Scientist <img src='./static/img/tg.png' width="10" height="10"> [Телеграм](https://t.me/nika_tonika), [Личный сайт](https://zaslavskaia.ru/)
 ---
 
 ## Описание проекта:
@@ -78,7 +78,7 @@
 ## Что под капотом у бота:
 #### Взлетаем с Aiogram:
 - <b>Telegram API в Действии:</b>
-Мы используем асинхронный фреймворк Aiogram, чтобы обеспечить быстрый и эффективный обмен данными с Telegram. Это позволяет боту мгновенно реагировать на запросы пользователей и обеспечивает плавное взаимодействие.[сайт фреймворка](https://aiogram.dev/)
+Мы используем асинхронный фреймворк [Aiogram](https://aiogram.dev/), чтобы обеспечить быстрый и эффективный обмен данными с Telegram. Это позволяет боту мгновенно реагировать на запросы пользователей и обеспечивает плавное взаимодействие.
 #### Волшебство OpenAI:
 - <b>Современные Чудеса с OpenAI API:</b>
 Пользователь общается с умной моделью ChatGPT благодаря [OpenAI API](https://platform.openai.com/docs/api-reference). Этот магический камень позволяет нам создавать разнообразные и персонализированные диалоги, делая взаимодействие с ботом удивительно естественным.
@@ -113,6 +113,7 @@
 9. Запустить проект: (Linux: python3 main.py Windows: python main.py)
 
 <div style="border: 3px dotted white; padding: 5px; margin-right: auto;  width: 80%;"> 
+
 <b>Следующие планы:</b>
 
 - разработка коллаборативной рексистемы;
