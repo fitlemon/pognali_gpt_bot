@@ -74,9 +74,7 @@ async def add_new_user_data(user_data: dict, user_id: int) -> bool:
     columns = ", ".join([key for key in user_data.keys()])
     values = (
         "("
-        + ", ".join(
-            ["'" + str(value).replace("'", '"') + "'" for value in user_data.values()]
-        )
+        + ", ".join([str(value).replace("'", '"') for value in user_data.values()])
         + ")"
     )
     query = "INSERT INTO public.users (" + columns + ") VALUES " + values + ";"
