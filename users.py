@@ -71,10 +71,16 @@ async def add_new_user_data(user_data: dict, user_id: int) -> bool:
     if user_exist:
         print(f"\nUser {user_id} existed\n")
         return False
-    columns = ", ".join([key for key in user_data.keys()])
+    columns = ", ".join([key for key in user_data.keys() if user_data["key"] != {""}])
     values = (
         "("
-        + ", ".join([str(value).replace("'", '"') for value in user_data.values()])
+        + ", ".join(
+            [
+                str(value).replace("'", '"')
+                for value in user_data.values()
+                if value != {""}
+            ]
+        )
         + ")"
     )
     query = "INSERT INTO public.users (" + columns + ") VALUES " + values + ";"
