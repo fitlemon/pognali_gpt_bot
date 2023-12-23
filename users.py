@@ -71,12 +71,11 @@ async def add_new_user_data(user_data: dict, user_id: int) -> bool:
     if user_exist:
         print(f"\nUser {user_id} existed\n")
         return False
-    keys = ["user_id", "user_name", "user_firstname"]
-    columns = ", ".join(keys)
+    columns = ", ".join([key for key in user_data.keys()])
     values = (
         "("
         + ", ".join(
-            ["'" + str(value) + "'" for key, value in user_data.items() if key in keys]
+            ["'" + str(value).replace("'", '"') + "'" for value in user_data.values()]
         )
         + ")"
     )
