@@ -76,11 +76,7 @@ async def add_new_user_data(user_data: dict, user_id: int) -> bool:
     values = (
         "("
         + ", ".join(
-            [
-                str(value) if type(value) is int else "'" + value + "'"
-                for key, value in user_data.items()
-                if key in keys
-            ]
+            ["'" + str(value) + "'" for key, value in user_data.items() if key in keys]
         )
         + ")"
     )
