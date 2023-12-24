@@ -9,7 +9,7 @@
 2. Davron Ikhmatullaev: ML Engineer / DevOps <img src='./static/img/tg.png' width="10" height="10"> [Телеграм](https://t.me/ihmatullaev) <img src='./static/img/linkedin.png' width="10" height="10"> [LinkedIn](https://www.linkedin.com/in/davron-ikhmatullaev/)
 3. Ярослав Баймлер: Документалист / QA Engineer <img src='./static/img/tg.png' width="10" height="10"> [Телеграм](https://t.me/Yar71542)
 4. Дмитрий Косачев: Fullstack-разработчик <img src='./static/img/tg.png' width="10" height="10"> [Телеграм](https://t.me/Kosatchev)
-5. Вероника Заславская: Data Scientist <img src='./static/img/tg.png' width="10" height="10"> [Телеграм](https://t.me/nika_tonika), [Личный сайт](https://zaslavskaia.ru/)
+5. Вероника Заславская: Data Scientist <img src='./static/img/tg.png' width="10" height="10"> [Телеграм](https://t.me/nika_tonika) [Личный сайт](https://zaslavskaia.ru/)
 ---
 
 #### Презентация:
@@ -104,7 +104,7 @@
 Пользователь общается с умной моделью ChatGPT благодаря [OpenAI API](https://platform.openai.com/docs/api-reference). Этот магический камень позволяет нам создавать разнообразные и персонализированные диалоги, делая взаимодействие с ботом удивительно естественным.
 #### Двигаемся с Sentence-Transformers:
 - <b>Мощный Движок Рекомендаций:</b>
-Для нашего поискового движка и рекомендательной системы мы используем sentence-transformers/all-MiniLM-L6-v2, полученного с сайта [Hugging Face](https://huggingface.co/sentence-transformers/all-MiniLM-L6-v2). Эта модель позволяет нам находить наиболее релевантные мероприятия, используя продвинутые методы анализа текста.
+Для нашего поискового движка и рекомендательной системы мы используем sentence-transformers/all-MiniLM-L6-v2, полученного с сайта [HuggingFace](https://huggingface.co/sentence-transformers/all-MiniLM-L6-v2). Эта модель позволяет нам находить наиболее релевантные мероприятия, используя продвинутые методы анализа текста.
 
 
 
@@ -130,7 +130,8 @@
 5. Установить виртуальное окружение пайтон .venv в  корневой папке папке (Linux: python3 -m venv .venv Windows: python -m venv .venv)
 6. Активировать виртуальное окружение .venv (Linux: source .venv/bin/activate Windows: .venv\Scripts\Activate.ps1)
 7. Установить необходимые модули Python. (pip install -r requirements.txt)
-8. Создать в корневой папке файлы: .env (хранение токенов) и db.json (хранение данных пользователей).
+8. Создать в корневой папке файлы: .env (хранение токенов - см. example.env).
+9. Установить СУБД PostgreSQL. Создать БД и Таблицы запуская последовательно скрипты: create_table.sql и остальные скрипты в папке sql.
 9. Запустить проект: (Linux: python3 main.py Windows: python main.py)
 
 
