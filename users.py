@@ -18,12 +18,12 @@ connect_params = {
 
 dict_sample = {
     "user_id": 1,
-    "user_name": "Test",
-    "user_firstname": "Test",
-    "user_surname": "unknown",
+    "user_name": "",
+    "user_firstname": "",
+    "user_surname": "",
     "age": 0,
-    "sex": "unknown",
-    "user_city": "unknown",
+    "sex": "",
+    "user_city": "",
     "main_music_genres": {""},
     "techno_music_genres": {""},
     "favorite_main_music_artists": {""},
@@ -31,9 +31,9 @@ dict_sample = {
     "favorite_djs": {""},
     "favorite_night_clubs": {""},
     "favorite_bars": {""},
-    "current_location_address": "unknown",
+    "current_location_address": "",
     "current_location_coordinates": (0, 0),
-    "last_question": "unknown",
+    "last_question": "",
 }
 
 
