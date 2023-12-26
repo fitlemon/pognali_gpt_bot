@@ -217,7 +217,7 @@ async def delete_user_data(user_id: int) -> bool:
         + str(value).replace("'", '"').replace("[", "{").replace("]", "}")
         + "'"
         for key, value in new_data.items()
-        if value != None and value != "" and key != "user_id" and key != "last_question"
+        if value != None and key != "user_id" and key != "last_question"
     ]
     print(f"\nColumn and values for update: {col_val}\n")
     query = (
