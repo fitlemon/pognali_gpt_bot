@@ -778,12 +778,28 @@ async def request_for_change_my_info(clbck: CallbackQuery, state: FSMContext):
     try:
         question = res[0]
         await users.add_last_question(question, clbck.message.chat.id)
+
+        delete_kb = [
+            InlineKeyboardButton(
+                text="🔺Удалить информацию обо мне", callback_data="delete_info"
+            )
+        ]
+        delete_kb = InlineKeyboardMarkup(inline_keyboard=delete_kb)
         await clbck.message.answer(
-            res[0] + text.text_watermark, disable_web_page_preview=True
+            res[0] + text.text_watermark,
+            disable_web_page_preview=True,
+            reply_markup=delete_kb,
         )
 
     except:
         await clbck.message.answer(text.gen_error, reply_markup=kb.exit_kb)
+
+
+# Handler for "Change my info" button
+@router.callback_query(F.data == "my_info")
+async def request_for_change_my_info(clbck: CallbackQuery, state: FSMContext):
+    await users.delete_user_data(clbck.message.chat.id)
+    await clbck.message.answer("☑️ Ваши данные успешно удалены с базы данных...")
 
 
 ## Handler for messages in "Update info" State
