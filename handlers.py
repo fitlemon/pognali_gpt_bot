@@ -780,14 +780,15 @@ async def request_for_change_my_info(clbck: CallbackQuery, state: FSMContext):
         await users.add_last_question(question, clbck.message.chat.id)
 
         delete_kb = [
-            InlineKeyboardButton(
-                text="🔺Удалить информацию обо мне", callback_data="delete_info"
-            )
+            [
+                InlineKeyboardButton(
+                    text="🔺Удалить информацию обо мне", callback_data="delete_info"
+                )
+            ]
         ]
         delete_kb = InlineKeyboardMarkup(inline_keyboard=delete_kb)
         await clbck.message.answer(
             res[0] + text.text_watermark,
-            disable_web_page_preview=True,
             reply_markup=delete_kb,
         )
 
@@ -796,7 +797,7 @@ async def request_for_change_my_info(clbck: CallbackQuery, state: FSMContext):
 
 
 # Handler for "Change my info" button
-@router.callback_query(F.data == "my_info")
+@router.callback_query(F.data == "delete_info")
 async def request_for_change_my_info(clbck: CallbackQuery, state: FSMContext):
     await users.delete_user_data(clbck.message.chat.id)
     await clbck.message.answer("☑️ Ваши данные успешно удалены с базы данных...")
@@ -811,7 +812,15 @@ async def change_my_info(msg: Message, state: FSMContext):
     # res = await utils.update_info_prompt(msg.text, user_data)
     await bot.send_chat_action(chat_id=msg.chat.id, action="typing")
     res = await utils.prompt_to_dude(msg.text, user_data)
-    await msg.answer(res[0] + text.text_watermark, disable_web_page_preview=True)
+    delete_kb = [
+        [
+            InlineKeyboardButton(
+                text="🔺Удалить информацию обо мне", callback_data="delete_info"
+            )
+        ]
+    ]
+    delete_kb = InlineKeyboardMarkup(inline_keyboard=delete_kb)
+    await msg.answer(res[0] + text.text_watermark, reply_markup=delete_kb)
     dict_res = await utils.prompt_to_dict_changer(msg.text, user_data)
     print(f"RETURN DICT TO HANDLER:{dict_res}")
 
