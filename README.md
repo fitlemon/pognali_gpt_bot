@@ -13,7 +13,7 @@
 ---
 
 #### Презентация:
-[Presentation.pdf](Presentation final.pdf)
+[Presentation.pdf](Presentation_final.pdf)
 
 
 ## 💡 Описание проекта:
