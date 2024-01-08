@@ -13,7 +13,11 @@
 ---
 
 #### Презентация:
+<<<<<<< HEAD
 [Presentation.pdf](Presentation final.pdf)
+=======
+[Presentation.pdf](Presentation_final.pdf)
+>>>>>>> 5fe504fb8fa0c3c13b818a54093f88ae82679508
 
 
 ## 💡 Описание проекта:
