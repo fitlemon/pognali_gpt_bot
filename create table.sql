@@ -2,7 +2,7 @@ DROP DATABASE pognali_gpt_bot;
 CREATE DATABASE pognali_gpt_bot WITH TEMPLATE = template0 ENCODING = 'UTF8' LOCALE_PROVIDER = libc LOCALE = 'ru_RU.UTF-8';
 
 CREATE TABLE public.users (
-    user_id integer NOT NULL,
+    user_id bigint NOT NULL,
     user_name character varying,
     user_firstname character varying,
     user_surname character varying,

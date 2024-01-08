@@ -69,12 +69,6 @@ events = [
     ],
     [
         InlineKeyboardButton(
-            text="✏️ 👤 Мероприятия по запросу и интересам",
-            callback_data="events_by_desc_and_user_data",
-        )
-    ],
-    [
-        InlineKeyboardButton(
             text="🚩 Мероприятия поблизости", callback_data="events_by_location"
         )
     ],
@@ -85,13 +79,7 @@ events = [
     ],
     [
         InlineKeyboardButton(
-            text="💚 Рекомендованные мне (описание)",
-            callback_data="events_recomend_by_desc",
-        )
-    ],
-    [
-        InlineKeyboardButton(
-            text="💚 Рекомендованные мне (описания+тэги) #️⃣ ",
+            text="💚 Рекомендованные мне",
             callback_data="events_recomend_by_desc_tags",
         )
     ],

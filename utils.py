@@ -14,6 +14,10 @@ env = Env()
 env.read_env()
 model = SentenceTransformer("sentence-transformers/all-MiniLM-L6-v2")
 
+## tags weight
+TAGS_WEIGHT = 0.7
+DESC_WEIGHT = 0.3
+
 
 ## Rangeer events by sementics compatibility
 async def rangeer(events_text, user_text, count=5):
@@ -36,6 +40,31 @@ async def rangeer(events_text, user_text, count=5):
     return best_cosine_scores
 
 
+## Rangeer events by sementics compatibility in tags and desc
+async def rangeer_by_two(events_text, user_text, count=5):
+    print("\n\n\nScoring rangeer between:")
+    print("\nUser context:", user_text)
+    print("\nEvents context:", events_text)
+    print("\n\n\n")
+    embedding_user = model.encode(user_text, convert_to_tensor=True)
+    cosine_scores = []
+    for id, desc, tag in events_text:
+        if desc == "" or tag == "":
+            continue
+        # compute similarity scores of two embeddings tags and user text
+        embedding_tag = model.encode(str(tag), convert_to_tensor=True)
+        cosine_score_tag = util.pytorch_cos_sim(embedding_user, embedding_tag)
+        # compute similarity scores of two embeddings desc and user text
+        embedding_desc = model.encode(str(desc), convert_to_tensor=True)
+        cosine_score_desc = util.pytorch_cos_sim(embedding_user, embedding_desc)
+        cosine_score = TAGS_WEIGHT * cosine_score_tag + DESC_WEIGHT * cosine_score_desc
+        cosine_scores.append([id, cosine_score])
+    # print(sorted(cosine_scores, reverse=True, key=lambda x: x[2]))
+    best_cosine_scores = sorted(cosine_scores, reverse=True, key=lambda x: x[1])[:count]
+    print(best_cosine_scores)
+    return best_cosine_scores
+
+
 openai.api_key = env("OPENAI_TOKEN")
 max_token_count = 4096
 logging.basicConfig(
@@ -53,57 +82,40 @@ connect_params = {
     "host": env("DB_HOST"),
 }
 
-current_date = "2023-10-01"  # For test imitate now date
-
-# async def update_info_prompt(prompt, userdata) -> dict:
-#     try:
-#         intro_rule = "Ты интервьюер, ты интересуешься мной и постоянно задаешь вопросы. Вот наш прошлый разговор:\n\n"
-#         question = f" Твой последний вопрос: {userdata['last_question']} \n"
-#         user_message = f"\n Вот мой ответ на твой вопрос: {prompt}. \n"
-#         user_dict =f"Есть Python словарь с данными обо мне, который ты должен заполнить. \n \
-#             Проанализируй свой вопрос и мой ответ и заполни этот словарь, чтобы больше обо мне знать. \n \
-#             Вот твой Python словарь с информацией обо мне, который ты обязан заполнить: \n my_dict = {userdata} \n"
-#         final_rule = "Дай комментарий на мой прошлый ответ. Смени деликатно тему. Сформулируй следующий вопрос на другую тему, чтобы заполнить словарь дальше. \n \
-#         \n \
-#         Если мой ответ был не в тему вопроса. Скажи что твоя задача узнать обо мне больше, и хотел бы чтобы я тебе отвечал на вопросы. \n \
-#         Или попросил сменить тему. Можешь даже переспрашивать информацию из словаря, уточняя ее актуальность . Будь веселым и можешь добавлять шутки к моим ответам. Сменяй темы разговоров. Главное чтобы заполнить недостающую информацию в твоем словаре. Не здаровайся. Мы давно уже общаемся. "
-#         remind_dict = ' и Прикрепи к своему следующему вопросу словарь с заполненными ключевыми словами и без комментариев и без лишних слов. Только словарь!! \n \
-#                     \n Не забудь обновить все ключи, особенно user_interests - мои интересы, topics_history - тема нашего прошлого разговора. \n \
-#                         \n Не создавай новые ключи.\n \
-#                         Отправляй в формате: my_info_dict = обновлённый словарь. ОБНОВИ КЛЮЧИ!!'
-#         full_message = [{"role": "user", "content": intro_rule + question + user_message + user_dict + final_rule + remind_dict}]
-
-
-#         response = await openai.ChatCompletion.acreate(
-#             model="gpt-3.5-turbo",
-#             messages=full_message
-#         )
-#         if response['usage']['total_tokens'] >= max_token_count:
-#             return None
-#         return response['choices'][0]['message']['content'] , full_message, response['usage']['total_tokens']
-#     except Exception as e:
-#         logging.error(e)
+current_date = "2023-09-01"  # For test imitate now date
 
 
 async def prompt_to_dude(prompt, userdata) -> dict:
     try:
         last_question = userdata["last_question"]
         del userdata["last_question"]
-        intro_rule = "Ты мой друг (бро)!! Я твой лучший друг (бро)!! Ты берешь у меня интервью уже пол часа. Ты задаешь мне вопросы, я на них отвечаю. Ты должен узнать какие ночные клубы, мероприятия мне нравятся. Какой жанр музыки, особенно в техно направлении, мне нравится"
+        intro_rule = "Не приветствуй. Ты мой друг (бро)!! Я твой лучший друг (бро)!! Ты берешь у меня интервью уже пол часа. Ты задаешь мне вопросы, я на них отвечаю. Ты должен узнать какие ночные клубы, мероприятия мне нравятся. Какой жанр музыки, особенно в техно направлении, мне нравится"
         question = f"Вот твой последний вопрос:  {last_question} \n"
         user_message = f"\n Вот мой ответ на этот вопрос:  {prompt}. \n"
         user_dict = f"Также я тебе дам  Python словарь, где приведена информация которой ты обладаешь обо мне на текущий момент.:  \n \
                    ```{userdata}```\n"
-        final_rule = "Твои следующие действия: \n1) Расскажи шутку о тусовках и прочее. (Never say me Hello).\n 2)  Прокомментируй мой ответ: если он был по теме твоего вопроса, то задавай уточняющий вопрос, если нужно, если нет то смени тему чтобы заполнить другую информацию обо мне (например, мой возраст, пол, мои любимые музыкальные жанры, техно жанры, любимые техно-артисты, любимые ночные клубы, бары, тусовки). если ответ был не потеме твоего вопроса, то отшутись по этому поводу и задай другой вопрос по теме \n 4) Если есть какая то информация в словаре, уточни эту информацию обо мне (например, мои любимые музыкальные жанры, техно жанры, любимые техно-артисты, любимые ночные клубы, бары, тусовки) \n P.S.: Добавляй emojies в свой текст"
+        final_rule = "не говори привет. Твои следующие действия: \n1) начни разговор  а с шутки про ИИ или тусоки (Don't  greet me). 2) Задавай уточняющий вопрос чтобы заполнить информацию обо мне (например, мой возраст, пол, мои любимые музыкальные жанры, техно жанры, любимые техно-артисты, любимые ночные клубы, бары, тусовки).  \n  \n P.S.: Добавляй emojies в свой текст"
         full_message = [
             {
                 "role": "user",
+                "content": f"Привет, рад быть твоим гостем на интервью.",
+            },
+            {
+                "role": "assistant",
+                "content": f"Привет, я тоже рад. Ты готов на мои вопросы!",
+            },
+            {
+                "role": "user",
+                "content": f"Да, я готов, можешь задавать следующие вопросы, чтобы узнать обо мне",
+            },
+            {
+                "role": "system",
                 "content": intro_rule
                 + question
                 + user_message
                 + user_dict
                 + final_rule,
-            }
+            },
         ]
 
         response = await openai.ChatCompletion.acreate(
@@ -254,6 +266,34 @@ async def get_upcoming_events_by_col(col: str) -> list:
             data = [
                 [x, y.replace("<br>", "\n").replace("<p>", "").replace("</p>", "")]
                 for x, y in data
+            ]
+            return data
+
+        except (Exception, psycopg2.DatabaseError) as error:
+            print(error)
+
+
+# Get upcoming events by date
+async def get_upcoming_events_desc_tags() -> list:
+    """_summary_
+
+    Returns:
+        list: [id, desc, tags]
+    """
+
+    with psycopg2.connect(**connect_params) as conn:
+        try:
+            with conn.cursor(cursor_factory=DictCursor) as cursor:
+                query = f"SELECT events.id, description , CONCAT(STRING_AGG(name, ', '), ', ', STRING_AGG(name_rus, ', ')) as event_tags FROM events LEFT JOIN taggable ON events.id = taggable.taggable_id LEFT JOIN tags on taggable.tag_id = tags.id WHERE taggable_type like '%Event%' and events.start_date > '{current_date}' GROUP By events.id;"
+                cursor.execute(query)
+                q = cursor.fetchall()
+                if q == None:
+                    print(f"Tags weren't found")
+                data = q
+            print(f"\nGot {len(data)} events...\n")
+            data = [
+                [x, y.replace("<br>", "\n").replace("<p>", "").replace("</p>", ""), z]
+                for x, y, z in data
             ]
             return data
 

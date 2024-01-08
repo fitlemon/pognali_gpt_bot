@@ -249,7 +249,7 @@ async def events_by_user_query_menu(clbck: CallbackQuery, state: FSMContext):
 
 # Catch  "Events by desc" button
 @router.message(Gen.events_by_desc)
-async def events_by_genre_user_query(msg: Message):
+async def events_by_desc(msg: Message):
     """
     Handler that give events by user query
     Args:
@@ -259,17 +259,17 @@ async def events_by_genre_user_query(msg: Message):
         "🔎 Ищу мероприятия для тебя по запросу: " + msg.text, parse_mode="html"
     )
 
-    upcoming_events = await utils.get_upcoming_events_by_col(
-        "description"
+    upcoming_events = (
+        await utils.get_upcoming_events_desc_tags()
     )  # get events with their tags
 
     print("Upcomin events:", upcoming_events)
     await bot.send_chat_action(chat_id=msg.chat.id, action="typing")
-    best_scored = await utils.rangeer(
+    best_scored = await utils.rangeer_by_two(
         upcoming_events, msg.text
     )  # rangeer events with user text (Context recommendation)
     print("Best scored: ", best_scored)
-    best_ids = tuple((id for id, tag, score in best_scored))
+    best_ids = tuple((id for id, score in best_scored))
     if not best_ids:
         await msg.answer("Мероприятия не найдены(", parse_mode="html")
         return None
@@ -548,7 +548,7 @@ async def events_recommend_by_desc_tags_menu(clbck: CallbackQuery, state: FSMCon
     # upcoming_events = await utils.get_upcoming_events("description")  # get_text_from_events
     need_text = [
         "main_music_genres",
-        "favorite_techno_music",
+        "techno_music_genres",
         "favorite_main_music_artists",
         "favorite_techno_music_artists",
         "favorite_night_clubs",
@@ -558,27 +558,101 @@ async def events_recommend_by_desc_tags_menu(clbck: CallbackQuery, state: FSMCon
         "sex",
         "user_city",
     ]
-    user_info_music = [
-        ", ".join(value) if type(value) is list else str(value)
+
+    # user_info_music = [
+    #     ", ".join(value) if type(value) is list else str(value)
+    #     for key, value in user_data.items()
+    #     if key in need_text and value != "" and value != [] and value != "unknown"
+    # ]
+    # user_info_music = ", ".join(user_info_music)
+    music_info = [
+        value
         for key, value in user_data.items()
-        if key in need_text and value != "" and value != [] and value != "unknown"
+        if key
+        in (
+            "main_music_genres",
+            "techno_music_genres",
+            "favorite_main_music_artists",
+            "favorite_techno_music_artists",
+        )
     ]
-    user_info_music = ", ".join(user_info_music)
-    await clbck.message.answer(
-        "🔎 Ищу мероприятия по твоим интересам:" + user_info_music, parse_mode="html"
-    )
-    upcoming_events = await utils.get_upcoming_events_with_tags(
-        "description"
+    print(music_info)
+    music_genres = []
+    user_text = ""
+    for info in music_info:
+        for genre in info:
+            if genre != "":
+                music_genres.append(genre)
+    if music_genres != []:
+        user_text += f"В музыке я предпочитаю: {', '.join(music_genres)}."
+
+    # get values from venues info
+    venues_info = [
+        value
+        for key, value in user_data.items()
+        if key
+        in (
+            "favorite_night_clubs",
+            "favorite_bars",
+        )
+    ]
+    venues = []
+
+    for info in venues_info:
+        for venue in info:
+            if venue != "":
+                venues.append(venue)
+    if venues != []:
+        user_text += f"Мне нравятся заведения: {', '.join(venues)}."
+
+    # get city and location
+    location_info = [
+        value
+        for key, value in user_data.items()
+        if key
+        in (
+            "current_location_address",
+            "user_city",
+        )
+    ]
+    locations = []
+
+    for info in location_info:
+        if info != "":
+            locations.append(info)
+    if locations != []:
+        user_text += f"Я проживаю: {', '.join(locations)}."
+
+    if user_text != "":
+        await clbck.message.answer(
+            "🔎 Ищу мероприятия по твоим интересам:" + user_text, parse_mode="html"
+        )
+    else:
+        offer_kb = [
+            [
+                InlineKeyboardButton(
+                    text="👤 Рассказать о себе ИИ", callback_data="my_info"
+                )
+            ]
+        ]
+        offer_kb = InlineKeyboardMarkup(inline_keyboard=offer_kb)
+        await clbck.message.answer(
+            "К сожалению твой профиль не заполнен. Заполни информацию о себе, пожалуйста.",
+            parse_mode="html",
+            reply_markup=offer_kb,
+        )
+        return None
+    upcoming_events = (
+        await utils.get_upcoming_events_desc_tags()
     )  # get events with their tags
-    upcoming_events = [[ids, desc + ", " + tag] for ids, desc, tag in upcoming_events]
 
     print("Upcomin events:", upcoming_events)
     await bot.send_chat_action(chat_id=clbck.message.chat.id, action="typing")
-    best_scored = await utils.rangeer(
-        upcoming_events, user_info_music
+    best_scored = await utils.rangeer_by_two(
+        upcoming_events, user_text
     )  # rangeer events with user text (Context recommendation)
     print("Best scored: ", best_scored)
-    best_ids = tuple((id for id, tag, score in best_scored))
+    best_ids = tuple((id for id, score in best_scored))
     if not best_ids:
         await clbck.message.answer("Мероприятия не найдены(", parse_mode="html")
         return None
@@ -704,12 +778,29 @@ async def request_for_change_my_info(clbck: CallbackQuery, state: FSMContext):
     try:
         question = res[0]
         await users.add_last_question(question, clbck.message.chat.id)
+
+        delete_kb = [
+            [
+                InlineKeyboardButton(
+                    text="🔺Удалить информацию обо мне", callback_data="delete_info"
+                )
+            ]
+        ]
+        delete_kb = InlineKeyboardMarkup(inline_keyboard=delete_kb)
         await clbck.message.answer(
-            res[0] + text.text_watermark, disable_web_page_preview=True
+            res[0] + text.text_watermark,
+            reply_markup=delete_kb,
         )
 
     except:
         await clbck.message.answer(text.gen_error, reply_markup=kb.exit_kb)
+
+
+# Handler for "Change my info" button
+@router.callback_query(F.data == "delete_info")
+async def request_for_change_my_info(clbck: CallbackQuery, state: FSMContext):
+    await users.delete_user_data(clbck.message.chat.id)
+    await clbck.message.answer("☑️ Ваши данные успешно удалены с базы данных...")
 
 
 ## Handler for messages in "Update info" State
@@ -721,7 +812,15 @@ async def change_my_info(msg: Message, state: FSMContext):
     # res = await utils.update_info_prompt(msg.text, user_data)
     await bot.send_chat_action(chat_id=msg.chat.id, action="typing")
     res = await utils.prompt_to_dude(msg.text, user_data)
-    await msg.answer(res[0] + text.text_watermark, disable_web_page_preview=True)
+    delete_kb = [
+        [
+            InlineKeyboardButton(
+                text="🔺Удалить информацию обо мне", callback_data="delete_info"
+            )
+        ]
+    ]
+    delete_kb = InlineKeyboardMarkup(inline_keyboard=delete_kb)
+    await msg.answer(res[0] + text.text_watermark, reply_markup=delete_kb)
     dict_res = await utils.prompt_to_dict_changer(msg.text, user_data)
     print(f"RETURN DICT TO HANDLER:{dict_res}")
 

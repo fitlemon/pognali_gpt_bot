@@ -18,12 +18,12 @@ connect_params = {
 
 dict_sample = {
     "user_id": 1,
-    "user_name": "Test",
-    "user_firstname": "Test",
-    "user_surname": "unknown",
+    "user_name": "",
+    "user_firstname": "",
+    "user_surname": "",
     "age": 0,
-    "sex": "unknown",
-    "user_city": "unknown",
+    "sex": "",
+    "user_city": "",
     "main_music_genres": {""},
     "techno_music_genres": {""},
     "favorite_main_music_artists": {""},
@@ -31,9 +31,9 @@ dict_sample = {
     "favorite_djs": {""},
     "favorite_night_clubs": {""},
     "favorite_bars": {""},
-    "current_location_address": "unknown",
+    "current_location_address": "",
     "current_location_coordinates": (0, 0),
-    "last_question": "unknown",
+    "last_question": "",
 }
 
 
@@ -201,4 +201,37 @@ async def add_last_question(question: dict, user_id: int) -> bool:
                             """
             )
     print(f"Last question for user {user_id} Updated!")
+    return True
+
+
+async def delete_user_data(user_id: int) -> bool:
+    print(f"\nDeleting data for user {user_id}...\n")
+    old_data = await get_user_data(user_id)
+    new_data = dict_sample.copy()
+    new_data["user_id"] = old_data["user_id"]
+    new_data["user_name"] = old_data["user_name"]
+    new_data["user_firstname"] = old_data["user_firstname"]
+    col_val = [
+        str(key)
+        + "='"
+        + str(value).replace("'", '"').replace("[", "{").replace("]", "}")
+        + "'"
+        for key, value in new_data.items()
+        if value != None and key != "user_id" and key != "last_question"
+    ]
+    print(f"\nColumn and values for update: {col_val}\n")
+    query = (
+        """update public.users set """
+        + ", ".join(col_val)
+        + " where user_id="
+        + str(user_id)
+    )
+    print("\n Update query:", query)
+    with psycopg2.connect(**connect_params) as conn:
+        try:
+            with conn.cursor(cursor_factory=DictCursor) as cursor:
+                cursor.execute(query)
+                print(f"\nData for user {user_id} updated...\n")
+        except (Exception, psycopg2.DatabaseError) as error:
+            print(error)
     return True
